@@ -25,21 +25,37 @@ static struct cdev *fib_cdev;
 static struct class *fib_class;
 static DEFINE_MUTEX(fib_mutex);
 
-static long long fib_sequence(long long k)
+static long long fib_sequence(long long n)
 {
-    if (k == 0)
-        return 0;
-    else if (k <= 2)
-        return 1;
+    int h = 64 - __builtin_clzll(n);
+    long long a = 0;  // F(n) = 0
+    long long b = 1;  // F(n + 1) = 1
 
-    if (k % 2) {
-        k = (k - 1) / 2;
-        return fib_sequence(k) * fib_sequence(k) +
-               fib_sequence(k + 1) * fib_sequence(k + 1);
-    } else {
-        k = k / 2;
-        return fib_sequence(k) * (2 * fib_sequence(k + 1) - fib_sequence(k));
+    for (long long mask = 1 << (h - 1); mask; mask >>= 1) {
+        // k = floor((n >> j) / 2)
+        // then a = F(k), b = F(k + 1) now.
+        long long c =
+            a * (2 * b - a);  // F(2k) = F(k) * [ 2 * F(k + 1) – F(k) ]
+        long long d = a * a + b * b;  // F(2k + 1) = F(k)^2 + F(k + 1)^2
+
+        /*
+         * n >> j is odd: n >> j = 2k + 1
+         * F(n >> j) = F(2k + 1)
+         * F(n >> j + 1) = F(2k + 2) = F(2k) + F(2k + 1)
+         *
+         * n >> j is even: n >> j = 2k
+         * F(n >> j) = F(2k)
+         * F(n >> j + 1) = F(2k + 1)
+         */
+        if (mask & n) {
+            a = d;
+            b = c + d;
+        } else {
+            a = c;
+            b = d;
+        }
     }
+    return a;
 }
 
 static int fib_open(struct inode *inode, struct file *file)
