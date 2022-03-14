@@ -27,16 +27,19 @@ static DEFINE_MUTEX(fib_mutex);
 
 static long long fib_sequence(long long k)
 {
-    long long f[] = {0, 1};
+    if (k == 0)
+        return 0;
+    else if (k <= 2)
+        return 1;
 
-    for (int i = 2; i <= k; i++) {
-        if (i % 2 == 0)
-            f[0] += f[1];
-        else
-            f[1] += f[0];
+    if (k % 2) {
+        k = (k - 1) / 2;
+        return fib_sequence(k) * fib_sequence(k) +
+               fib_sequence(k + 1) * fib_sequence(k + 1);
+    } else {
+        k = k / 2;
+        return fib_sequence(k) * (2 * fib_sequence(k + 1) - fib_sequence(k));
     }
-
-    return (k % 2) ? f[1] : f[0];
 }
 
 static int fib_open(struct inode *inode, struct file *file)
