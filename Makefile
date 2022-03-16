@@ -20,6 +20,7 @@ clean:
 	$(MAKE) -C $(KDIR) M=$(PWD) clean
 	$(RM) client out
 load:
+	sudo rmmod $(TARGET_MODULE) || true >/dev/null
 	sudo insmod $(TARGET_MODULE).ko
 unload:
 	sudo rmmod $(TARGET_MODULE) || true >/dev/null

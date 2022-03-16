@@ -25,7 +25,41 @@ static struct cdev *fib_cdev;
 static struct class *fib_class;
 static DEFINE_MUTEX(fib_mutex);
 
-static long long fib_sequence(long long n)
+static long long (*fibs[3])(long long k);
+
+static long long fib_sequence(long long k)
+{
+    long long f[] = {0, 1};
+
+    for (int i = 2; i <= k; i++) {
+        if (i & 1)
+            f[1] += f[0];
+        else
+            f[0] += f[1];
+    }
+
+    return (k & 1) ? f[1] : f[0];
+}
+
+static long long fast_doubling1(long long k)
+{
+    if (k == 0)
+        return 0;
+    else if (k <= 2)
+        return 1;
+
+    long long a = fast_doubling1(k / 2);
+    long long b = fast_doubling1(k / 2 + 1);
+    if (k % 2) {
+        // k = (k - 1) / 2;
+        return a * a + b * b;
+    } else {
+        // k = k / 2;
+        return a * (2 * b - a);
+    }
+}
+
+static long long fast_doubling2(long long n)
 {
     int h = 64 - __builtin_clzll(n);
     long long a = 0;  // F(n) = 0
@@ -88,7 +122,13 @@ static ssize_t fib_write(struct file *file,
                          size_t size,
                          loff_t *offset)
 {
-    return 1;
+    if (size > 2)
+        return 1;
+    ktime_t kt = ktime_get();
+    fibs[size](*offset);
+    kt = ktime_sub(ktime_get(), kt);
+
+    return (ssize_t)(ktime_to_ns(kt));
 }
 
 static loff_t fib_device_lseek(struct file *file, loff_t offset, int orig)
@@ -126,6 +166,9 @@ const struct file_operations fib_fops = {
 static int __init init_fib_dev(void)
 {
     int rc = 0;
+    fibs[0] = fib_sequence;
+    fibs[1] = fast_doubling1;
+    fibs[2] = fast_doubling2;
 
     mutex_init(&fib_mutex);
 
