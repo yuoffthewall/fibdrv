@@ -32,13 +32,10 @@ static long long fib_sequence(long long k)
     long long f[] = {0, 1};
 
     for (int i = 2; i <= k; i++) {
-        if (i & 1)
-            f[1] += f[0];
-        else
-            f[0] += f[1];
+        f[(i & 1)] += f[((i - 1) & 1)];
     }
 
-    return (k & 1) ? f[1] : f[0];
+    return f[(k & 1)];
 }
 
 static long long fast_doubling1(long long k)

@@ -3,13 +3,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
+#include <time.h>
 #include <unistd.h>
 
 #define FIB_DEV "/dev/fibonacci"
 
 int main(int argc, char *argv[])
 {
-    long long sz;
+    long long sz;  // return value of read() or write() from kernel space
 
     char write_buf[] = "testing writing";
     int offset = 100; /* TODO: try test something bigger than the limit */
@@ -44,10 +45,16 @@ int main(int argc, char *argv[])
                    i, sz);
         }
     } else {
+        struct timespec tt1, tt2;
+        // printf("consumes %ld nanoseconds!\n", tt2.tv_nsec - tt1.tv_nsec);
         for (int i = 0; i <= offset; i++) {
             lseek(fd, i, SEEK_SET);
+            clock_gettime(CLOCK_REALTIME, &tt1);
             sz = write(fd, write_buf, atoi(argv[1]));
-            printf("%d %lld\n", i, sz);
+            clock_gettime(CLOCK_REALTIME, &tt2);
+            long user_time = tt2.tv_nsec - tt1.tv_nsec;
+            long diff = user_time - sz;
+            printf("%d %lld %ld, %ld\n", i, sz, user_time, diff);
         }
     }
 
