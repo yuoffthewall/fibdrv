@@ -27,22 +27,22 @@ int main(int argc, char *argv[])
             printf("Writing to " FIB_DEV ", returned the sequence %lld\n", sz);
         }
 
-        char buf[1];
+        char buf[40];
         for (int i = 0; i <= offset; i++) {
             lseek(fd, i, SEEK_SET);
-            sz = read(fd, buf, 1);
+            sz = read(fd, buf, 40);
             printf("Reading from " FIB_DEV
                    " at offset %d, returned the sequence "
-                   "%lld.\n",
-                   i, sz);
+                   "%s.\n",
+                   i, buf);
         }
         for (int i = offset; i >= 0; i--) {
             lseek(fd, i, SEEK_SET);
-            sz = read(fd, buf, 1);
+            sz = read(fd, buf, 40);
             printf("Reading from " FIB_DEV
                    " at offset %d, returned the sequence "
-                   "%lld.\n",
-                   i, sz);
+                   "%s.\n",
+                   i, buf);
         }
     } else {
         struct timespec tt1, tt2;
