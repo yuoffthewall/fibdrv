@@ -7,6 +7,7 @@
 #include <linux/module.h>
 #include <linux/mutex.h>
 #include <linux/slab.h>
+#include "bn.h"
 
 MODULE_LICENSE("Dual MIT/GPL");
 MODULE_AUTHOR("National Cheng Kung University, Taiwan");
@@ -26,35 +27,6 @@ static struct class *fib_class;
 static DEFINE_MUTEX(fib_mutex);
 
 static long long (*fibs[3])(long long k);
-
-#define bound 10000000000000000000ULL
-
-typedef struct bigN {
-    unsigned long long upper, lower;
-} bigN;
-
-bigN addBigN(struct bigN x, struct bigN y)
-{
-    bigN output = {0, 0};
-    output.upper = x.upper + y.upper;
-    if (y.lower >= bound - x.lower) {
-        output.upper++;
-        output.lower = x.lower + y.lower - bound;
-    } else
-        output.lower = x.lower + y.lower;
-    return output;
-}
-
-bigN fib(long long k)
-{
-    bigN f[] = {{0, 0}, {0, 1}};
-
-    for (int i = 2; i <= k; i++) {
-        f[(i & 1)] = addBigN(f[(i & 1)], f[((i - 1) & 1)]);
-    }
-
-    return f[(k & 1)];
-}
 
 static long long fib_sequence(long long k)
 {
@@ -139,13 +111,12 @@ static ssize_t fib_read(struct file *file,
                         size_t size,
                         loff_t *offset)
 {
-    bigN n = fib(*offset);
-    char *s = kmalloc(size, GFP_KERNEL);  // upper + lower
-    if (n.upper == 0)
-        snprintf(s, size, "%llu", n.lower);
-    else
-        snprintf(s, size, "%llu%019llu", n.upper, n.lower);
-    unsigned long ret = copy_to_user(buf, s, strlen(s) + 1);
+    struct list_head *n = fib_big(*offset);
+    char *s = list_to_string(n);
+    char *temp = s;
+    while (*temp == '0' && *(temp + 1) != '\0')
+        temp++;
+    unsigned long ret = copy_to_user(buf, temp, strlen(temp) + 1);
     kfree(s);
     return ret;
     // return (ssize_t) fib_sequence(*offset);
