@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
             clock_gettime(CLOCK_REALTIME, &tt2);
             long user_time = tt2.tv_nsec - tt1.tv_nsec;
             long diff = user_time - sz;
-            printf("%d %lld %ld, %ld\n", i, sz, user_time, diff);
+            printf("%d %lld %ld %ld\n", i, sz, user_time, diff);
         }
     }
 

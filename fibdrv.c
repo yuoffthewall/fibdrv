@@ -128,11 +128,18 @@ static ssize_t fib_write(struct file *file,
                          size_t size,
                          loff_t *offset)
 {
-    if (size > 2)
+    if (size > 3)
         return 1;
-    ktime_t kt = ktime_get();
-    fibs[size](*offset);
-    kt = ktime_sub(ktime_get(), kt);
+    ktime_t kt;
+    if (size == 3) {  // fib big
+        kt = ktime_get();
+        fib_big(*offset);
+        kt = ktime_sub(ktime_get(), kt);
+    } else {
+        kt = ktime_get();
+        fibs[size](*offset);
+        kt = ktime_sub(ktime_get(), kt);
+    }
 
     return (ssize_t)(ktime_to_ns(kt));
 }
