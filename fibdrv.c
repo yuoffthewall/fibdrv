@@ -48,7 +48,7 @@ static long long fast_doubling1(long long k)
 
     long long a = fast_doubling1(k / 2);
     long long b = fast_doubling1(k / 2 + 1);
-    if (k % 2) {
+    if (k & 1) {
         // k = (k - 1) / 2;
         return a * a + b * b;
     } else {
@@ -111,14 +111,15 @@ static ssize_t fib_read(struct file *file,
                         size_t size,
                         loff_t *offset)
 {
-    struct list_head *n = fib_big(*offset);
-    char *s = list_to_string(n);
-    char *temp = s;
-    while (*temp == '0' && *(temp + 1) != '\0')
-        temp++;
-    unsigned long ret = copy_to_user(buf, temp, strlen(temp) + 1);
-    kfree(s);
-    return ret;
+    bn *temp = fast_doubling(*offset);
+    bn *encoded = bcd_encode(temp);
+    unsigned long ret = copy_to_user(buf, encoded->num, encoded->len + 1);
+    size_t len = encoded->len;
+    freebn(temp);
+    freebn(encoded);
+    if (ret)
+        return -1;
+    return len;
     // return (ssize_t) fib_sequence(*offset);
 }
 
@@ -128,12 +129,16 @@ static ssize_t fib_write(struct file *file,
                          size_t size,
                          loff_t *offset)
 {
-    if (size > 3)
+    if (size > 4)
         return 1;
     ktime_t kt;
     if (size == 3) {  // fib big
         kt = ktime_get();
         fib_big(*offset);
+        kt = ktime_sub(ktime_get(), kt);
+    } else if (size == 4) {  // fib big
+        kt = ktime_get();
+        fast_doubling(*offset);
         kt = ktime_sub(ktime_get(), kt);
     } else {
         kt = ktime_get();
