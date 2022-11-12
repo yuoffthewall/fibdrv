@@ -80,7 +80,9 @@ int main(int argc, char *argv[])
     } else {
         struct timespec tt1, tt2;
         // printf("consumes %ld nanoseconds!\n", tt2.tv_nsec - tt1.tv_nsec);
-        int offset_test = 10000;
+        int offset_test = 100;
+        printf("n = %d\n%-10s %-10s %-10s %-10s\n", offset_test, "round",
+               "ker_time", "user_time", "time_lag");
         for (int i = 0; i <= offset_test; i++) {
             lseek(fd, i, SEEK_SET);
             clock_gettime(CLOCK_REALTIME, &tt1);
@@ -88,7 +90,7 @@ int main(int argc, char *argv[])
             clock_gettime(CLOCK_REALTIME, &tt2);
             long user_time = tt2.tv_nsec - tt1.tv_nsec;
             long diff = user_time - sz;
-            printf("%d %lld %ld %ld\n", i, sz, user_time, diff);
+            printf("%-10d %-10lld %-10ld %-10ld\n", i, sz, user_time, diff);
         }
     }
 

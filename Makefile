@@ -1,5 +1,5 @@
 CONFIG_MODULE_SIG = n
-TARGET_MODULE := fibdrv_new
+TARGET_MODULE := fibdrv_mod
 OBJS := bn
 
 obj-m := $(TARGET_MODULE).o
