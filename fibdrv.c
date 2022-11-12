@@ -19,7 +19,7 @@ MODULE_VERSION("0.1");
 /* MAX_LENGTH is set to 92 because
  * ssize_t can't fit the number > 92
  */
-#define MAX_LENGTH 100
+#define MAX_LENGTH 9877
 
 static dev_t fib_dev = 0;
 static struct cdev *fib_cdev;
@@ -111,7 +111,7 @@ static ssize_t fib_read(struct file *file,
                         size_t size,
                         loff_t *offset)
 {
-    bn *temp = fast_doubling(*offset);
+    bn *temp = fast_doubling_char(*offset);
     bn *encoded = bcd_encode(temp);
     unsigned long ret = copy_to_user(buf, encoded->num, encoded->len + 1);
     size_t len = encoded->len;
@@ -134,11 +134,11 @@ static ssize_t fib_write(struct file *file,
     ktime_t kt;
     if (size == 3) {  // fib big
         kt = ktime_get();
-        fib_big(*offset);
+        fib_linkedlist(*offset);
         kt = ktime_sub(ktime_get(), kt);
     } else if (size == 4) {  // fib big
         kt = ktime_get();
-        fast_doubling(*offset);
+        fast_doubling_char(*offset);
         kt = ktime_sub(ktime_get(), kt);
     } else {
         kt = ktime_get();

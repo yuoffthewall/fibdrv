@@ -43,7 +43,6 @@ int main(int argc, char *argv[])
 {
     long long sz;  // return value of read() or write() from kernel space
 
-    char write_buf[] = "testing writing";
 
     int fd = open(FIB_DEV, O_RDWR);
     if (fd < 0) {
@@ -51,8 +50,10 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
+    // testing (make check)
     if (argc == 1) {
-        int offset = 100; /* TODO: try test something bigger than the limit */
+        char write_buf[] = "testing writing";
+        int offset = 100;
         for (int i = 0; i <= offset; i++) {
             sz = write(fd, write_buf, strlen(write_buf));
             printf("Writing to " FIB_DEV ", returned the sequence %lld\n", sz);
@@ -77,12 +78,31 @@ int main(int argc, char *argv[])
                    "%s.\n",
                    i, ans);
         }
-    } else {
+    }
+    // calculate nth fib number
+    else if (argc > 1) {
+        int offset = atoi(argv[1]);
+        char buf[4096];
+        // set fd offset
+        lseek(fd, offset, SEEK_SET);
+        sz = read(fd, buf, 40);
+        char *ans = reverse_str(bin_to_str(buf, sz));
+        printf("Reading from " FIB_DEV
+               " at offset %d, returned the sequence "
+               "%s.\n",
+               offset, ans);
+        free(ans);
+    }
+
+    // benchmarking
+    /*
+    else {
+        char write_buf[] = "testing writing";
         struct timespec tt1, tt2;
         // printf("consumes %ld nanoseconds!\n", tt2.tv_nsec - tt1.tv_nsec);
         int offset_test = 100;
-        printf("n = %d\n%-10s %-10s %-10s %-10s\n", offset_test, "round",
-               "ker_time", "user_time", "time_lag");
+        printf("n = %d\n%-10s %-10s %-10s %-10s\n",
+                offset_test, "round", "ker_time", "user_time", "time_lag");
         for (int i = 0; i <= offset_test; i++) {
             lseek(fd, i, SEEK_SET);
             clock_gettime(CLOCK_REALTIME, &tt1);
@@ -93,6 +113,7 @@ int main(int argc, char *argv[])
             printf("%-10d %-10lld %-10ld %-10ld\n", i, sz, user_time, diff);
         }
     }
+    */
 
     close(fd);
     return 0;

@@ -1,6 +1,7 @@
 #include "bn.h"
 #include <linux/slab.h>
 
+/* ----------- Implementation using linked list ----------- */
 size_t list_len = 0;
 
 void new_node(struct list_head *list, unsigned long long num)
@@ -36,7 +37,7 @@ void add_big_num(struct list_head *small,
     }
 }
 
-struct list_head *fib_big(long long k)
+struct list_head *fib_linkedlist(long long k)
 {
     struct list_head *f[2];
     list_len = 1;
@@ -201,7 +202,7 @@ void freebn(bn *n)
     kfree(n);
 }
 
-bn *fast_doubling(long long n)
+bn *fast_doubling_char(long long n)
 {
     int msb = 64 - __builtin_clzll(n);
     bn *a = bn_alloc(2);
@@ -258,6 +259,7 @@ bn *fast_doubling(long long n)
 
 bn *bcd_encode(bn *ans)
 {
+    // use 4 bits to store each digit
     size_t sz = ans->len / 2 + (ans->len & 1) + 1;
     bn *bin = bn_alloc(sz);
     for (int i = 0; i < bin->len; i++) {

@@ -22,7 +22,7 @@ void new_node(struct list_head *list, unsigned long long num);
 void add_big_num(struct list_head *small,
                  struct list_head *large);  // large add to small
 
-struct list_head *fib_big(long long k);
+struct list_head *fib_linkedlist(long long k);
 
 void list_reverse(struct list_head *head);
 
@@ -61,7 +61,7 @@ bn *bn_mul(bn *a, bn *b);
 
 void freebn(bn *n);
 
-bn *fast_doubling(long long n);
+bn *fast_doubling_char(long long n);
 
 bn *bcd_encode(bn *ans);
 
