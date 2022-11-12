@@ -68,6 +68,7 @@ int main(int argc, char *argv[])
                    " at offset %d, returned the sequence "
                    "%s.\n",
                    i, ans);
+            free(ans);
         }
         for (int i = offset; i >= 0; i--) {
             lseek(fd, i, SEEK_SET);
@@ -77,12 +78,13 @@ int main(int argc, char *argv[])
                    " at offset %d, returned the sequence "
                    "%s.\n",
                    i, ans);
+            free(ans);
         }
     }
     // calculate nth fib number
     else if (argc > 1) {
         int offset = atoi(argv[1]);
-        char buf[4096];
+        char buf[100000];
         // set fd offset
         lseek(fd, offset, SEEK_SET);
         sz = read(fd, buf, 40);
