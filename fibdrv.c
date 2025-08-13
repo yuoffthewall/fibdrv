@@ -216,7 +216,7 @@ static int __init init_fib_dev(void)
         goto failed_cdev;
     }
 
-    fib_class = class_create(THIS_MODULE, DEV_FIBONACCI_NAME);
+    fib_class = class_create(DEV_FIBONACCI_NAME);
 
     if (!fib_class) {
         printk(KERN_ALERT "Failed to create device class");
