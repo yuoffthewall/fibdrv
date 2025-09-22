@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
         }
     }
     // calculate nth fib number
-    else if (argc > 1) {
+    else if (argc == 2) {
         int offset = atoi(argv[1]);
         char buf[100000];
         // set fd offset
@@ -97,25 +97,24 @@ int main(int argc, char *argv[])
     }
 
     // benchmarking
-    /*
-    else {
+    else if (argc == 3) {
         char write_buf[] = "testing writing";
         struct timespec tt1, tt2;
         // printf("consumes %ld nanoseconds!\n", tt2.tv_nsec - tt1.tv_nsec);
-        int offset_test = 100;
+        int offset_test = atoi(argv[1]);
+        int target_func = atoi(argv[2]);
         printf("n = %d\n%-10s %-10s %-10s %-10s\n",
                 offset_test, "round", "ker_time", "user_time", "time_lag");
         for (int i = 0; i <= offset_test; i++) {
             lseek(fd, i, SEEK_SET);
             clock_gettime(CLOCK_REALTIME, &tt1);
-            sz = write(fd, write_buf, atoi(argv[1]));
+            sz = write(fd, write_buf, target_func);
             clock_gettime(CLOCK_REALTIME, &tt2);
             long user_time = tt2.tv_nsec - tt1.tv_nsec;
             long diff = user_time - sz;
             printf("%-10d %-10lld %-10ld %-10ld\n", i, sz, user_time, diff);
         }
     }
-    */
 
     close(fd);
     return 0;
